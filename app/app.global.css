@@ -1,4 +1,6 @@
 @import "~font-awesome/css/font-awesome.css";
+@import "~bootstrap/dist/css/bootstrap.min.css";
+@import "~bootstrap/dist/css/bootstrap-theme.min.css";
 
 body {
   position: relative;
@@ -10,9 +12,17 @@ body {
   overflow-y: hidden;
 }
 
-h2 {
+h1 {
   margin: 0;
   font-size: 2.25rem;
+  font-weight: bold;
+  letter-spacing: -0.025em;
+  color: #fff;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.8rem;
   font-weight: bold;
   letter-spacing: -0.025em;
   color: #fff;
@@ -37,3 +47,11 @@ a:hover {
   text-decoration: none;
   cursor: pointer;
 }
+
+/* Set gray background color and 100% height */
+.well {
+  background: #232c39;
+  height: 100%;
+
+}
+

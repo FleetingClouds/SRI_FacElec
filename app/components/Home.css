@@ -1,14 +1,41 @@
-.container {
+/*.container {
   position: absolute;
-  top: 30%;
+  top: 1%;
   left: 10px;
-  text-align: center;
+  text-align: left;
+}
+*/
+
+.container h1 {
+  font-size: 2.2rem;
 }
 
 .container h2 {
-  font-size: 5rem;
+  font-size: 4.8rem;
 }
 
 .container a {
   font-size: 1.4rem;
+}
+
+
+/* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+.row.content {height: 90%}
+
+/* Set gray background color and 100% height */
+.sidenav {
+  background-color: #232c39;
+  height: 100%;
+}
+
+/* Set gray background color and 100% height */
+.well {
+  border-redius: 10px;
+  background-color: #232c39;
+  height: 100%;
+}
+
+/* On small screens, set height to 'auto' for the grid */
+@media screen and (max-width: 767px) {
+  .row.content {height: auto;}
 }
