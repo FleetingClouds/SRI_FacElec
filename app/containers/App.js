@@ -41,14 +41,13 @@ export default class App extends Component {
               <h1>Iridium Blue</h1>
               <h2>Facturacion Electronica</h2>
               <ul className="nav nav-pills nav-stacked">
-                <li><a href="#section1">Dashboard</a></li>
                 <li><Link to="/">Home</Link></li>
-                <li><Link to="/upload">Upload</Link></li>
+                <li><Link to="/load">File Import</Link></li>
                 <li><Link to="/counter">Counter</Link></li>
               </ul>
             </div>
 
-            <div class="clearfix visible-xs"></div>
+            <div className="clearfix visible-xs"></div>
             <div className="col-sm-9">
               {this.props.children}
             </div>
