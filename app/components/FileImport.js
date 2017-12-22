@@ -2,79 +2,197 @@
 import React, { Component } from 'react';
 import styles from './Home.css';
 
+import streamWriter from '../utils/streamWriter';
+
 import ReactDOM from 'react-dom';
 import Files from 'react-files';
+import o2x from 'object-to-xml';
+import { Button } from 'react-bootstrap';
 import ParseCSV from 'papaparse';
 
+let dcmnt = null;
+let jsonFactura = null;
+
+const checkDigit11 = src => {
+  let res = src.toString().split('').reverse()
+             .map( (elem, idx) => elem * (idx%6 + 2) )
+             .reduce( (acc, val) => acc + val )%11;
+  return res === 0 ? 0 : 11 - res;
+}
 
 export default class FileImport extends Component {
 
-  onFileRead( a, b ) {
-    console.log( '  got  ');
-    console.log(  a  );
-    console.log(  b  );
-
-  };
-
   onFilesChange(files) {
     const csvFile = files[0];
-    console.log( csvFile );
-    const val = `Column 1,Column 2,Column 3,Column 4
-1-1,1-2,1-3,1-4
-2-1,2-2,2-3,2-4
-3-1,3-2,3-3,3-4
-4,5,6,7`;
 
-    let idx = null;
+    let row_num = null;
     let started = null;
     let attributeNames = null;
+    let rowOneFlag = null;
+    let parts = [];
+    let outFile = streamWriter;
+    let doingDetails = false;
+
     const config = {
       delimiter: "," ,
       skipEmptyLines: true ,
-      complete: () => { console.log(  'Done'  ); },
-      beforeFirstChunk: () => {
-        idx = 1;
-        started = false;
+
+      complete: () => {
+        outFile.endStream();
+        console.log(  'Done'  );
       },
 
+      beforeFirstChunk: () => {
+        row_num = 1;
+        started = false;
+        rowOneFlag = `infoTributaria.secuencial`;
+
+        outFile.appName = `sri_FacElec`;
+        outFile.fileNamePrefix = `invoice`;
+        outFile.fileNameSuffix = `xml`;
+        outFile.streamConfig = { flags: 'w' }
+
+        dcmnt = {
+          internal: {},
+          infoTributaria: {},
+          infoFactura: { totalConImpuestos: { totalImpuesto: { codigo: 2, codigoPorcentaje: 2 } } },
+          detalles: { detalle: {} },
+          infoAdicional: { campoAdicional: {} }
+        }
+
+        jsonFactura = {};
+        jsonFactura.factura = {
+          '@' : { version : `1.0.0`, id: `comprobante` },
+          '#' : dcmnt
+        };
+
+        dcmnt.infoTributaria.ambiente = 1;
+        dcmnt.infoTributaria.tipoEmision = 1;
+        dcmnt.infoTributaria.razonSocial = `Logichem Solutions Sociedad Anonima`;
+        dcmnt.infoTributaria.ruc = `1792177758001`;
+        dcmnt.infoTributaria.codDoc = String(`01`);
+        dcmnt.infoTributaria.estab = String(`001`);
+        dcmnt.infoTributaria.ptoEmi = String(`001`);
+        dcmnt.infoTributaria.dirMatriz = `Av. Interoceanica S/N, Pichincha, Quito, Cumbaya`;
+
+        // dcmnt.infoFactura.tipoDeComprobante = 1;
+
+        dcmnt.infoAdicional.campoAdicional = [];
+        dcmnt.infoAdicional.campoAdicional.push({
+           '@': { nombre: "Dirección" },
+           '#': `Av. Interoceanica S/N, Pichincha, Quito, Cumbaya`
+        });
+        dcmnt.infoAdicional.campoAdicional.push({
+           '@': { nombre: "Teléfono" },
+           '#': `1-503-882-7179`
+        });
+        dcmnt.infoAdicional.campoAdicional.push({
+           '@': { nombre: "Email" },
+           '#': `logichemec@gmail.com`
+        });
+      },
       step: ( results, parser ) => {
         const row = results.data[0];
-        const obj = {};
-        if ( row[0] === `# de Factura` ) {
+        let doingDetails = false;
+        let numDetail = -1;
+        console.log( 'Factura #%s', row[0] );
+        if ( row[0] === rowOneFlag ) {
           attributeNames = row;
           started = true;
           return;
         };
         if ( started ) {
-          if ( true ) {
-          // if ( row[0] > 0 ) {
-            console.log( 'Row #%s', idx );
-            // console.log( ` Col #3 %s = %s`, attributeNames[3], row[3] );
-            row.map( ( elem, idx ) => obj[attributeNames[idx]] = elem );
-            console.log( ` razonSocialComprador = %s`, obj.razonSocialComprador );
-          };
+          if ( row_num === 11 ) {
+            console.log( 'Row #%s', row_num );
+            row.map( ( elem, idx ) => {
+              if ( elem ) {
+                parts = attributeNames[idx].split(`.`);
+                switch ( parts.length ) {
+                  case 0:
+                    break;
+                  case 1:
+                    dcmnt[parts[0]] = elem;
+                    break;
+                  case 2:
+                    dcmnt[parts[0]][parts[1]] = elem;
+                    // console.log( `|| dcmnt.%s.%s = %s`, parts[0], parts[1], elem );
+                    break;
+                  case 3:
+                    // console.log( `||| dcmnt.%s.%s.%s = %s`, parts[0], parts[1], parts[2], elem );
+                    if ( numDetail < 0 && attributeNames[idx] === `detalles.detalle.codigoPrincipal` ) {
+                      dcmnt[parts[0]][parts[1]] = [];
+                      numDetail = 0;
+                    }
+                    if ( numDetail > -1 && attributeNames[idx] === `detalles.detalle.codigoPrincipal`) {
+                      dcmnt[parts[0]][parts[1]].push( { codigoPrincipal: elem } );
+                      numDetail++;
+                    } else if ( numDetail > -1 ) {
+                      // console.log( `C %s.%s[%s].%s`, parts[0], parts[1], numDetail-1, parts[2] );
+                      // console.log( dcmnt[parts[0]][parts[1]][numDetail-1] );
+                      dcmnt[parts[0]][parts[1]][numDetail-1][parts[2]] = elem;
+                    } else {
+                      dcmnt[parts[0]][parts[1]][parts[2]] = elem;
+                    }
+                    break;
+                  case 4:
+                    dcmnt[parts[0]][parts[1]][parts[2]][parts[3]] = elem;
+                    // console.log( `|||| dcmnt.%s.%s.%s.%s = %s`, parts[0], parts[1], parts[2], parts[3], elem );
+                    break;
+                  case 5:
+                    // console.log( `|||| dcmnt.%s.%s.%s.%s.%s = %s`, parts[0], parts[1], [numDetail-1], parts[2], parts[3], parts[4], elem );
+                    dcmnt[parts[0]][parts[1]][numDetail-1][parts[2]] = {};
+                    dcmnt[parts[0]][parts[1]][numDetail-1][parts[2]][parts[3]] = {};
+                    dcmnt[parts[0]][parts[1]][numDetail-1][parts[2]][parts[3]][parts[4]] = elem;
+                    // console.log( dcmnt[parts[0]][parts[1]][numDetail-1][parts[2]] );
+                    break;
+                }
+              }
+            });
+
+            let periods = dcmnt.infoFactura.fechaEmision.split('/');
+            let fecha = new Date(periods[2], periods[1], periods[0]);
+            console.log( `fecha : %s`, fecha );
+            let secuencial = String("00" + dcmnt.infoTributaria.secuencial).padStart(9, `0`);
+            dcmnt.infoTributaria.secuencial = secuencial;
+            let codigoNumerico = String(dcmnt.internal.codcliente.padStart(8, `0`));
+
+            let clave = String(``.concat(
+              String(fecha.getDate()).padStart(2, `0`),
+              String(fecha.getMonth()).padStart(2, `0`),
+              fecha.getFullYear(),
+              dcmnt.infoTributaria.codDoc,
+              dcmnt.infoTributaria.ruc,
+              dcmnt.infoTributaria.ambiente,
+              dcmnt.infoTributaria.estab,
+              dcmnt.infoTributaria.ptoEmi,
+              secuencial,
+              codigoNumerico,
+              dcmnt.infoTributaria.tipoEmision
+            ));
+            dcmnt.infoTributaria.claveAcceso = clave + checkDigit11(clave);
+            delete dcmnt.internal;
+            // 2017-10-23 1 1792177758001 1 001 001 000007557 00000296 1
+
+            const xmlResult = `<?xml version="1.0" encoding="UTF-8" ?>\n`.concat(o2x(jsonFactura));
+            // console.log( `Document` );
+            // console.log( xmlResult );
+            outFile.fileNamePrefix = `fac${secuencial}`;
+            outFile( xmlResult );
+
+
+
+            // console.log(JSON.stringify( dcmnt.infoAdicional ) );
+            // console.log(o2x(dcmnt.infoAdicional));
+
+            // console.log( dcmnt );
+          }
         };
-        idx++;
+        row_num++;
       }
 
     };
-    // ParseCSV.parse(files[0], config)
+
     ParseCSV.parse( csvFile, config );
-
-    // let res = ParseCSV.parse(files[0], { delimiter: "," }, (e) => {
-    //   console.log( 'parsed ', e );
-    // })
-
-
-    // const csv = StreamCSV();
-    // let reader = new FileReader();
-    // reader.onload = (event) => {
-    //   console.log( '  got  ');
-    //   let the_data = event.target.result
-    //   console.log(  the_data  );
-    //   // $('#some_container_div').html("<img src='" + the_url + "' />")
-    // }
-    // reader.readAsText( files[0] );
 
   };
 
@@ -102,6 +220,7 @@ export default class FileImport extends Component {
               <a>Choose a CSV file of sales document data</a>
             </Files>
           </div>
+          <hr/>
         </div>
       </div>
     );
