@@ -25,7 +25,7 @@ function streamWriter( payLoad ) {
   streamWriter.stream.write( payLoad );
 }
 
-function initStreamConfig() {
+const initStreamConfig = () => {
   streamWriter.file = streamWriter.file ||
                       findTargetPath(
                         streamWriter.appName,
@@ -33,23 +33,25 @@ function initStreamConfig() {
                         streamWriter.fileNameSuffix
                       );
 
-  if (streamWriter.file) {
-    console.log('Streaming to :: ', streamWriter.file);
-  } else {
+  if ( ! streamWriter.file) {
+  //   console.log('Streaming to :: ', streamWriter.file);
+  // } else {
     console.log('Could not set up a file for streaming');
   }
 }
 
-function openStream() {
+streamWriter.initStreamConfig = initStreamConfig;
+
+const openStream = () => {
   streamWriter.stream = fs.createWriteStream(
     streamWriter.file,
-    streamWriter.streamConfig || { flags: 'a' }
+    streamWriter.streamConfig || { flags: 'w+' }
   );
 
   console.log('Stream opened.');
 }
 
-function getStreamSize(stream) {
+const getStreamSize = stream => {
   if (!stream) {
     return 0;
   }
@@ -65,7 +67,7 @@ function getStreamSize(stream) {
   return stream.logSizeAtStart + stream.bytesWritten;
 }
 
-function archiveLog(stream) {
+const archiveLog = stream => {
   if (stream.end) {
     stream.end();
   }

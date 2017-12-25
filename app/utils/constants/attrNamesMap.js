@@ -1,6 +1,7 @@
 export default {
 
   baseimponible: `baseImponible`,
+  codigoporcentaje: `codigoPorcentaje`,
   codigoprincipal: `codigoPrincipal`,
   direstablecimiento: `dirEstablecimiento`,
   fechaemision: `fechaEmision`,

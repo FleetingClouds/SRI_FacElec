@@ -1,6 +1,7 @@
 // @flow
 import React, { Component } from 'react';
 import fs from 'fs';
+import rm from 'rimraf';
 
 import async from 'async';
 import GoogleSpreadsheet from 'google-spreadsheet';
@@ -11,6 +12,9 @@ import { Button } from 'react-bootstrap';
 import styles from './Home.css';
 import Names from '../utils/constants/attrNamesMap'
 import pathFinder from '../utils/streamWriter/findTargetPath';
+
+import streamWriter from '../utils/streamWriter';
+import checkDigit11 from '../utils/checkDigit11';
 
 const creds_path = pathFinder( `sri_FacElec`, ``, ``, `LogichemAutoInvoiceServiceAcct.json` );
 
@@ -34,27 +38,18 @@ const getDetailsAttributes = (detail) => {
 }
 
 let cnt = 0;
-// let impuestos = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
-let impuestos = [];
+let impuestos = new Array();
 const appendAttribute = ( obj, aryNames, value ) => {
   let name = aryNames.shift();
   if( name ) {
     cnt++;
     name = Names[name] ? Names[name] : name;
     if ( name === "impuestos" ) {
-      // if ( ! obj[name] ) obj[name] = {};
-      // if ( ! obj[name][aryNames[0]] ) obj[name][aryNames[0]] = {};
-      // obj[name][aryNames[0]] = {};
-
-      // console.log( `Special treatment at %s Name = %s Value = %s`, cnt, name, value );
-      // console.log( aryNames );
-      // console.log( obj );
-      let twig = {};
-      twig[aryNames[0]] = {};
-      let x = aryNames[1].split('_');
-      twig[aryNames[0]][x[0]] = value;
-      // console.log( twig );
-      impuestos.push( twig );
+      let twigs = {};
+      twigs[aryNames[0]] = {};
+      let leaves = aryNames[1].split('_');
+      twigs[aryNames[0]][leaves[0]] = value;
+      impuestos.push( twigs );
     } else {
       if( ! obj[name] ) obj[name] = {};
       // console.log( obj );
@@ -77,6 +72,14 @@ const wkbk = new GoogleSpreadsheet('1mGmXRn4dgVRmXmeqDrZ-zy88q-8ihqhXQoiR6-PJLoI
 const exportSheet = `SRI Export`;
 let dataSet = null;
 let row = null;
+let secuencial = null;
+let claveAcceso = null;
+
+let xmlHeader = `<?xml version="1.0" encoding="UTF-8" ?>\n`;
+let xmlResult = xmlHeader;
+
+let outFile = null;
+
 const testSheetConnection = () => {
 
   let wksht = null;
@@ -113,7 +116,7 @@ const testSheetConnection = () => {
       }, function( err, rows ) {
         let ii = 0;
         // console.log( rows[ii][colDay] );
-        rows[ii][colDay] = 28;
+        rows[ii][colDay] = 27;
         rows[ii][colMonth] = 11;
         rows[ii][colYear] = 2017;
         rows[ii].save(function( err ) {
@@ -131,12 +134,6 @@ const testSheetConnection = () => {
         // infoFactura: { totalConImpuestos: { totalImpuesto: { codigo: 2, codigoPorcentaje: 2 } } },
         // detalles: { detalle: {} },
       }
-
-      jsonInvoice = {};
-      jsonInvoice.factura = {
-        '@' : { version : `1.0.0`, id: `comprobante` },
-        '#' : dcmnt
-      };
 
       dcmnt.infoTributaria.ambiente = 1;
       dcmnt.infoTributaria.tipoEmision = 1;
@@ -162,6 +159,7 @@ const testSheetConnection = () => {
          '@': { nombre: "Email" },
          '#': `logichemec@gmail.com`
       });
+
       step();
     },
 
@@ -191,51 +189,115 @@ const testSheetConnection = () => {
         let col = k[0];
         let elem = k[1];
         // console.log('Entry %s = %s', col, elem );
+        if ( col === `infotributaria.secuencial` ) {
+          elem = String("00" + elem).padStart(9, `0`);
+          secuencial = elem;
+        }
         let parts = col.split(`.`);
         processColumn( parts, elem );
       });
       // console.log( `dcmnt` );
       // console.log( dcmnt );
+      console.log( `secuencial` );
+      console.log( secuencial );
       step();
     },
 
     processInvoiceDetails: (step) => {
       let details = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
-      console.log( `impuestos` );
+      console.log( `impuestoos` );
       console.log( impuestos );
       Object.entries(dcmnt.detalles.detalle).forEach( detail => {
         let o = getDetailsAttributes(detail);
         if ( o.attr === `codigoPrincipal` ) {
           details[o.idx][`impuestos`] = impuestos[o.idx];
-          // console.log( `Index %s`, o.idx );
-          // console.log( impuestos[o.idx] );
-        // } else {
         }
 
-        // console.log( `At details[%s][%s] = %s;`, o.idx, o.attr, o.value );
         details[o.idx][o.attr] = o.value;
       });
       dcmnt.detalles.detalle = details.filter( detail =>
         detail.codigoPrincipal
       );
-      // console.log( `Details!` );
-      // console.log( dcmnt.detalles );
+
+      impuestos = new Array();
+      step();
+    },
+
+    prepareAccessKey: (step) => {
+
+      let periods = dcmnt.infoFactura.fechaEmision.split('/');
+      let fecha = new Date(periods[2], periods[1], periods[0]);
+      console.log( `fecha : %s`, fecha );
+      dcmnt.infoTributaria.secuencial = secuencial;
+      let codigoNumerico = String(dcmnt.internal.codcliente.padStart(8, `0`));
+
+      let clave = String(``.concat(
+        String(fecha.getDate()).padStart(2, `0`),
+        String(fecha.getMonth()).padStart(2, `0`),
+        fecha.getFullYear(),
+        dcmnt.infoTributaria.codDoc,
+        dcmnt.infoTributaria.ruc,
+        dcmnt.infoTributaria.ambiente,
+        dcmnt.infoTributaria.estab,
+        dcmnt.infoTributaria.ptoEmi,
+        secuencial,
+        codigoNumerico,
+        dcmnt.infoTributaria.tipoEmision
+      ));
+      dcmnt.infoTributaria.claveAcceso = clave + checkDigit11(clave);
+
       step();
     },
 
     prepareXMl: (step) => {
       console.log( `Prepare XML` );
       delete dcmnt.internal;
-      const xmlResult = `<?xml version="1.0" encoding="UTF-8" ?>\n`
-                        .concat(o2x(dcmnt));
-      // console.log( `Document` );
-      console.log( xmlResult );
-      // outFile.fileNamePrefix = `fac${secuencial}`;
-      // outFile( xmlResult );
+
+      jsonInvoice = {};
+      jsonInvoice.factura = {
+        '@' : { version : `1.0.0`, id: `comprobante` },
+        '#' : dcmnt
+      };
+
+      xmlResult = xmlResult.concat(o2x(jsonInvoice));
+
+      step();
+    },
+
+    prepareOutFile: (step) => {
+      console.log( `Prepare Output File for invoice #%s`, secuencial );
+      outFile = streamWriter;
+
+      outFile.appName = `sri_FacElec`;
+      outFile.fileNameSuffix = `xml`;
+      outFile.streamConfig = { flags: 'w+' }
+
+      outFile.fileNamePrefix = `fac_${secuencial}`;
+      outFile.initStreamConfig();
+
+      const targetFile = outFile.file;
+      rm( targetFile, function (err) {
+        // console.log( `Trying to delete '${targetFile}'.` );
+        if ( err ) {
+          return console.error( `Unable to delete previous target file '${targetFile}' ::\n`, err);
+        }
+        // console.log( `Did delete` );
+        step();
+      });
+    },
+
+    writeOutFile: (step) => {
+      console.log( `Writing to "%s"`, outFile.file );
+      outFile( xmlResult );
+      xmlResult = xmlHeader;
+      step();
+    },
+
+    closeOutFile: (step) => {
+      outFile.endStream();
+      console.log(  'Done'  );
       step();
     }
-
-
 
   }, function(err){
       if( err ) {

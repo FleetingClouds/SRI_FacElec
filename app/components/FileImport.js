@@ -13,13 +13,6 @@ import ParseCSV from 'papaparse';
 let dcmnt = null;
 let jsonFactura = null;
 
-const checkDigit11 = src => {
-  let res = src.toString().split('').reverse()
-             .map( (elem, idx) => elem * (idx%6 + 2) )
-             .reduce( (acc, val) => acc + val )%11;
-  return res === 0 ? 0 : 11 - res;
-}
-
 export default class FileImport extends Component {
 
   onFilesChange(files) {
@@ -176,7 +169,7 @@ export default class FileImport extends Component {
             const xmlResult = `<?xml version="1.0" encoding="UTF-8" ?>\n`.concat(o2x(jsonFactura));
             // console.log( `Document` );
             // console.log( xmlResult );
-            outFile.fileNamePrefix = `fac${secuencial}`;
+            outFile.fileNamePrefix = `fac_${secuencial}`;
             outFile( xmlResult );
 
 
