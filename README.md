@@ -4,8 +4,7 @@
 
 <br/>
 
-[![Build Status][travis-image]][travis-url]
-[![Appveyor Build Status][appveyor-image]][appveyor-url]
+[![CircleCI](https://circleci.com/gh/FleetingClouds/SRI_FacElec.svg?style=svg)](https://circleci.com/gh/FleetingClouds/SRI_FacElec)
 [![Dependency Status][david_img]][david_site]
 [![Github Tag][github-tag-image]][github-tag-url]
 [![Join the chat at https://gitter.im/electron-react-boilerplate/Lobby](https://badges.gitter.im/electron-react-boilerplate/Lobby.svg)](https://gitter.im/electron-react-boilerplate/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
