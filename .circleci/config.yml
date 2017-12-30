@@ -1,5 +1,8 @@
 
 version: 2
+branches:
+  only:
+   - dev
 jobs:
   electron-linux-x64:
     docker:
@@ -7,9 +10,6 @@ jobs:
         environment:
           TARGET_ARCH: x64
           DISPLAY: ':99.0'
-    branches:
-      only:
-       - dev
     steps:
       - checkout
       - run:
