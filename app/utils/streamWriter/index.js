@@ -25,7 +25,11 @@ function streamWriter( payLoad ) {
   streamWriter.stream.write( payLoad );
 }
 
-const initStreamConfig = () => {
+const initStreamConfig = ( prefix ) => {
+  if ( prefix && prefix !== streamWriter.fileNamePrefix ) {
+    delete streamWriter.file;
+    streamWriter.fileNamePrefix = prefix;
+  }
   streamWriter.file = streamWriter.file ||
                       findTargetPath(
                         streamWriter.appName,

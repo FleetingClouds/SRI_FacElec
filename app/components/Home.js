@@ -1,5 +1,6 @@
 // @flow
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import fs from 'fs';
 import rm from 'rimraf';
 
@@ -9,6 +10,7 @@ import o2x from 'object-to-xml';
 
 import { Button } from 'react-bootstrap';
 
+import { _jsonInvoice, dayInvoicing, fileSpecs } from '../../settings';
 import styles from './Home.css';
 import Names from '../utils/constants/attrNamesMap'
 import pathFinder from '../utils/streamWriter/findTargetPath';
@@ -16,13 +18,25 @@ import pathFinder from '../utils/streamWriter/findTargetPath';
 import streamWriter from '../utils/streamWriter';
 import checkDigit11 from '../utils/checkDigit11';
 
+import soap from '../utils/soap';
+
+const LG = console.log;
+
 const creds_path = pathFinder( `sri_FacElec`, ``, ``, `LogichemAutoInvoiceServiceAcct.json` );
+const IMPUESTOS = `impuestos`;
+
+const colDay = `infofactura.totalsinimpuestos`;
+const colMonth = `internal.subTotal_IVA0`;
+const colYear = `infoFactura.totalDescuento`;
+
+const colUidInvoice = `infotributaria.secuencial`;
+const colUidDetail = `codigoPrincipal`;
 
 let creds_json = null;
 try {
     creds_json = JSON.parse( fs.readFileSync( creds_path, 'utf8' ) );
 } catch(e) {
-    console.log('Error: Unable to load Google Sheets access credentials', e.stack);
+    LG('Error: Unable to load Google Sheets access credentials', e.stack);
 }
 
 let dcmnt = null;
@@ -44,7 +58,7 @@ const appendAttribute = ( obj, aryNames, value ) => {
   if( name ) {
     cnt++;
     name = Names[name] ? Names[name] : name;
-    if ( name === "impuestos" ) {
+    if ( name === IMPUESTOS ) {
       let twigs = {};
       twigs[aryNames[0]] = {};
       let leaves = aryNames[1].split('_');
@@ -52,7 +66,7 @@ const appendAttribute = ( obj, aryNames, value ) => {
       impuestos.push( twigs );
     } else {
       if( ! obj[name] ) obj[name] = {};
-      // console.log( obj );
+      // LG( obj );
       if ( aryNames.length > 0 ) {
         appendAttribute( obj[name], aryNames, value );
       } else {
@@ -78,139 +92,136 @@ let claveAcceso = null;
 let xmlHeader = `<?xml version="1.0" encoding="UTF-8" ?>\n`;
 let xmlResult = xmlHeader;
 
-let outFile = null;
+let fileInvoiceXML = null;
 
-const testSheetConnection = () => {
+const prepareOutFile = ( _secuencial ) => {
+  let stream = streamWriter;
+
+  stream.appName = fileSpecs.appName;
+  stream.fileNameSuffix = fileSpecs.fileNameSuffixXML;
+  stream.streamConfig = { flags: 'w+' }
+
+  stream.initStreamConfig( `${fileSpecs.fileNamePrefix}_${_secuencial}` );
+
+  LG( `Stream prepared : "%s"`, stream.file );
+  return stream;
+};
+
+const testSheetConnection = ( _numInvoice ) => {
+
+  let prefix = `${fileSpecs.fileNamePrefix}_${String( _numInvoice ).padStart(9, `0`)}`;
+
+  if ( ! fileInvoiceXML || prefix !== fileInvoiceXML.fileNamePrefix ) {
+    fileInvoiceXML = prepareOutFile( String( _numInvoice ).padStart(9, `0`) );
+    LG( `new outfile %s`, fileInvoiceXML.file );
+  } else {
+    LG( `existing outfile %s`, fileInvoiceXML.file );
+  }
+
+  soap ( fileInvoiceXML.file );
+
+};
+
+const buildXMLDoc = () => {
 
   let wksht = null;
   let wksht_id = null;
   async.series({
 
-    authenticate: (step) => {
+    authenticate: step => {
       wkbk.useServiceAccountAuth(creds_json, step);
     },
 
-    getExportationSheet: (step) => {
+    getExportationSheet: step => {
       wkbk.getInfo(function(err, info) {
-        // console.log('Loaded wkbk: '+info.title+' by '+info.author.email);
+        // LG('Loaded wkbk: '+info.title+' by '+info.author.email);
         info.worksheets.forEach( ( key, val ) => {
           if ( key.title === exportSheet ) {
             wksht_id = key.id;
             wksht = info.worksheets[val];
-            // console.log(`array #`, wksht.id);
+            // LG(`array #`, wksht.id);
           };
         });
         step();
       });
     },
 
-    setTheDate: (step) => {
-      // console.log('wksht.getRows() :', wksht);
-      const colDay = `infofactura.totalsinimpuestos`;
-      const colMonth = `internal.subTotal_IVA0`;
-      const colYear = `infoFactura.totalDescuento`;
+    setTheDate: step => {
 
       wkbk.getRows( wksht_id, {
         offset: 1,
         limit: 1
       }, function( err, rows ) {
         let ii = 0;
-        // console.log( rows[ii][colDay] );
-        rows[ii][colDay] = 27;
-        rows[ii][colMonth] = 11;
-        rows[ii][colYear] = 2017;
+        // LG( rows[ii][colDay] );
+        rows[ii][colDay]   = dayInvoicing.Day;
+        rows[ii][colMonth] = dayInvoicing.Month;
+        rows[ii][colYear]  = dayInvoicing.Year;
         rows[ii].save(function( err ) {
-          if ( err ) console.log( `Saved row!\n%s`, err);
+          if ( err ) LG( `Saved row!\n%s`, err);
         });
         step();
       });
     },
 
-    resetInvoiceAttributes: (step) => {
-      dcmnt = {
-        infoTributaria: {},
-        infoAdicional: { campoAdicional: {} }
-        // internal: { codCliente: {} },
-        // infoFactura: { totalConImpuestos: { totalImpuesto: { codigo: 2, codigoPorcentaje: 2 } } },
-        // detalles: { detalle: {} },
-      }
-
-      dcmnt.infoTributaria.ambiente = 1;
-      dcmnt.infoTributaria.tipoEmision = 1;
-      dcmnt.infoTributaria.razonSocial = `Logichem Solutions Sociedad Anonima`;
-      dcmnt.infoTributaria.ruc = `1792177758001`;
-      dcmnt.infoTributaria.codDoc = String(`01`);
-      dcmnt.infoTributaria.estab = String(`001`);
-      dcmnt.infoTributaria.ptoEmi = String(`001`);
-      dcmnt.infoTributaria.dirMatriz = `Av. Interoceanica S/N, Pichincha, Quito, Cumbaya`;
-
-      // dcmnt.infoFactura.tipoDeComprobante = 1;
-
-      dcmnt.infoAdicional.campoAdicional = [];
-      dcmnt.infoAdicional.campoAdicional.push({
-         '@': { nombre: "Dirección" },
-         '#': `Av. Interoceanica S/N, Pichincha, Quito, Cumbaya`
-      });
-      dcmnt.infoAdicional.campoAdicional.push({
-         '@': { nombre: "Teléfono" },
-         '#': `1-503-882-7179`
-      });
-      dcmnt.infoAdicional.campoAdicional.push({
-         '@': { nombre: "Email" },
-         '#': `logichemec@gmail.com`
-      });
+    resetInvoiceAttributes: step => {
+      jsonInvoice = _jsonInvoice;
+      jsonInvoice.factura['#'].detalles = {};
+      dcmnt = jsonInvoice.factura['#'];
 
       step();
     },
 
 
-    getTheDataSet: (step) => {
-      console.log( wksht );
+    getTheDataSet: step => {
+      LG( wksht );
       wkbk.getRows( wksht_id, {
         offset: 4,
         limit: 200
       }, function( err, rows ) {
-        // console.log( `Read %s rows`, rows.length);
+        // LG( `Read %s rows`, rows.length);
         dataSet = rows;
         step();
       });
     },
 
-    processAnInvoice: (step) => {
+    processAnInvoice: step => {
       let ii = 0;
       row = dataSet[ii];
-      // console.log('processAnInvoice() :', row[`infotributaria.secuencial`] );
+      // LG('processAnInvoice() :', row[`infotributaria.secuencial`] );
       let entries = Object.entries(row);
-      // console.log( `Read %s entries`, entries.length);
+      // LG( `Read %s entries`, entries.length);
       let attributes = entries.filter( (k, v) => {
         if ( ! excludedAttributes.includes(k[0]) ) return k;
       });
       attributes.forEach( k => {
         let col = k[0];
         let elem = k[1];
-        // console.log('Entry %s = %s', col, elem );
-        if ( col === `infotributaria.secuencial` ) {
+        // LG('Entry %s vs %s = %s', colUidInvoice, col, elem );
+
+        if ( col === colUidInvoice ) {
           elem = String("00" + elem).padStart(9, `0`);
           secuencial = elem;
         }
         let parts = col.split(`.`);
         processColumn( parts, elem );
       });
-      // console.log( `dcmnt` );
-      // console.log( dcmnt );
-      console.log( `secuencial` );
-      console.log( secuencial );
+      // LG( `dcmnt` );
+      // LG( dcmnt );
+      LG( `secuencial` );
+      LG( secuencial );
       step();
     },
 
-    processInvoiceDetails: (step) => {
+    processInvoiceDetails: step => {
       let details = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
-      console.log( `impuestoos` );
-      console.log( impuestos );
+      // LG( IMPUESTOS );
+      // LG( impuestos );
+
       Object.entries(dcmnt.detalles.detalle).forEach( detail => {
         let o = getDetailsAttributes(detail);
-        if ( o.attr === `codigoPrincipal` ) {
-          details[o.idx][`impuestos`] = impuestos[o.idx];
+        if ( o.attr === colUidDetail ) {
+          details[o.idx][IMPUESTOS] = impuestos[o.idx];
         }
 
         details[o.idx][o.attr] = o.value;
@@ -223,12 +234,15 @@ const testSheetConnection = () => {
       step();
     },
 
-    prepareAccessKey: (step) => {
+    prepareAccessKey: step => {
+
+      LG( `prepareAccessKey` );
+      LG( jsonInvoice );
 
       let periods = dcmnt.infoFactura.fechaEmision.split('/');
       let fecha = new Date(periods[2], periods[1], periods[0]);
-      console.log( `fecha : %s`, fecha );
-      dcmnt.infoTributaria.secuencial = secuencial;
+      LG( `Invoicing date : %s`, fecha );
+      jsonInvoice.factura['#'].infoTributaria.secuencial = secuencial;
       let codigoNumerico = String(dcmnt.internal.codcliente.padStart(8, `0`));
 
       let clave = String(``.concat(
@@ -244,71 +258,93 @@ const testSheetConnection = () => {
         codigoNumerico,
         dcmnt.infoTributaria.tipoEmision
       ));
-      dcmnt.infoTributaria.claveAcceso = clave + checkDigit11(clave);
+      jsonInvoice.factura['#'].infoTributaria.claveAcceso = clave + checkDigit11(clave);
 
       step();
     },
 
-    prepareXMl: (step) => {
-      console.log( `Prepare XML` );
+    prepareXMl: step => {
+      LG( `Prepare XML` );
+      LG( jsonInvoice );
       delete dcmnt.internal;
-
-      jsonInvoice = {};
-      jsonInvoice.factura = {
-        '@' : { version : `1.0.0`, id: `comprobante` },
-        '#' : dcmnt
-      };
 
       xmlResult = xmlResult.concat(o2x(jsonInvoice));
 
       step();
     },
 
-    prepareOutFile: (step) => {
-      console.log( `Prepare Output File for invoice #%s`, secuencial );
-      outFile = streamWriter;
+    prepareOutFile: step => {
+      LG( `Prepare Output File for invoice #%s`, secuencial );
 
-      outFile.appName = `sri_FacElec`;
-      outFile.fileNameSuffix = `xml`;
-      outFile.streamConfig = { flags: 'w+' }
+      fileInvoiceXML = prepareOutFile( secuencial );
 
-      outFile.fileNamePrefix = `fac_${secuencial}`;
-      outFile.initStreamConfig();
-
-      const targetFile = outFile.file;
+      const targetFile = fileInvoiceXML.file;
       rm( targetFile, function (err) {
-        // console.log( `Trying to delete '${targetFile}'.` );
+        // LG( `Trying to delete '${targetFile}'.` );
         if ( err ) {
           return console.error( `Unable to delete previous target file '${targetFile}' ::\n`, err);
         }
-        // console.log( `Did delete` );
+        // LG( `Did delete` );
         step();
       });
     },
 
-    writeOutFile: (step) => {
-      console.log( `Writing to "%s"`, outFile.file );
-      outFile( xmlResult );
+    writeOutFile: step => {
+      LG( `Writing to "%s"`, fileInvoiceXML.file );
+      fileInvoiceXML( xmlResult );
       xmlResult = xmlHeader;
       step();
     },
 
-    closeOutFile: (step) => {
-      outFile.endStream();
-      console.log(  'Done'  );
+    closeOutFile: step => {
+      fileInvoiceXML.endStream();
+      LG(  'Done'  );
       step();
     }
 
   }, function(err){
       if( err ) {
-        console.log('Error: '+err);
+        LG('Error: '+err);
       }
   });
 
   return;
 };
 
-export default class Home extends Component {
+// export default class Home extends Component {
+//   render() {
+//     return (
+//       <div>
+//         <div className={styles.container} data-tid="container">
+//           <h2>Home</h2>
+//           <input
+//             placeholder = "Try">
+//           </input>
+//           <Link to="/counter">to Counter</Link>
+//         </div>
+//       </div>
+//     );
+//   }
+// }
+
+export default class Home extends React.Component {
+  constructor(props, context) {
+  super(props, context);
+
+    this.state = {
+      num_invoice: -1
+    };
+
+
+    this.numInvoice = this.numInvoice.bind(this);
+  }
+
+  numInvoice(e) {
+    // LG( `e.target.value %s`, e.target.value )
+    this.setState({
+      num_invoice: e.target.value
+    });
+  }
 
   render() {
     return (
@@ -319,11 +355,20 @@ export default class Home extends Component {
           <Button
               bsStyle="success"
               bsSize="small"
-              onClick={() => testSheetConnection()}>
+              onClick={() => buildXMLDoc()}>
             Get Invoicing Data
           </Button>
-          <div id="result">Some text..</div>
-          <p></p>
+          <br/ >
+          <input onChange={this.numInvoice}
+            placeholder = "Enter an invoice number">
+          </input>
+          <br/ >
+          <Button
+              bsStyle="success"
+              bsSize="small"
+              onClick={() => testSheetConnection(this.state.num_invoice)}>
+            Quick Test
+          </Button>
         </div>
       </div>
     );
