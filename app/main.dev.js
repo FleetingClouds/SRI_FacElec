@@ -24,8 +24,6 @@ if ( process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true'
   require( 'electron-debug' )();
   const path = require( 'path' );
   const p = path.join( __dirname, '..', 'app', 'node_modules' );
-  console.log( '==================' );
-  console.log( p );
   require( 'module' ).globalPaths.push( p );
 }
 

@@ -193,7 +193,6 @@
     "font-awesome": "^4.7.0",
     "google-spreadsheet": "^2.0.4",
     "history": "^4.6.3",
-    "jest-cli": "^22.0.4",
     "object-to-xml": "^1.1.0",
     "papaparse": "^4.3.6",
     "react": "^15.6.2",
@@ -207,7 +206,6 @@
     "react-router-redux": "^5.0.0-alpha.6",
     "redux": "^3.7.1",
     "redux-thunk": "^2.2.0",
-    "rimraf": "^2.6.2",
     "source-map-support": "^0.4.15"
   },
   "devEngines": {
