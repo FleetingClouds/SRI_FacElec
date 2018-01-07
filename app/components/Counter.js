@@ -13,7 +13,9 @@ class Counter extends Component {
   };
 
   render() {
-    const { increment, incrementIfOdd, incrementAsync, decrement, counter } = this.props;
+    const {
+      increment, incrementIfOdd, incrementAsync, decrement, counter
+    } = this.props;
     return (
       <div>
         <div className={styles.backButton} data-tid="backButton">

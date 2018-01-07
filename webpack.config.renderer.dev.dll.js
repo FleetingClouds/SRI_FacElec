@@ -9,11 +9,11 @@ import baseConfig from './webpack.config.base';
 import { dependencies } from './package.json';
 import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
 
-CheckNodeEnv('development');
+CheckNodeEnv( 'development' );
 
-const dist = path.resolve(process.cwd(), 'dll');
+const dist = path.resolve( process.cwd(), 'dll' );
 
-export default merge.smart(baseConfig, {
+export default merge.smart( baseConfig, {
   context: process.cwd(),
 
   devtool: 'eval',
@@ -164,8 +164,8 @@ export default merge.smart(baseConfig, {
   entry: {
     renderer: (
       Object
-        .keys(dependencies || {})
-        .filter(dependency => dependency !== 'font-awesome')
+        .keys( dependencies || {} )
+        .filter( dependency => dependency !== 'font-awesome' )
     )
   },
 
@@ -177,10 +177,10 @@ export default merge.smart(baseConfig, {
   },
 
   plugins: [
-    new webpack.DllPlugin({
-      path: path.join(dist, '[name].json'),
+    new webpack.DllPlugin( {
+      path: path.join( dist, '[name].json' ),
       name: '[name]',
-    }),
+    } ),
 
     /**
      * Create global constants which can be configured at compile time.
@@ -191,18 +191,18 @@ export default merge.smart(baseConfig, {
      * NODE_ENV should be production so that modules do not perform certain
      * development checks
      */
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
-    }),
+    new webpack.DefinePlugin( {
+      'process.env.NODE_ENV': JSON.stringify( process.env.NODE_ENV || 'development' )
+    } ),
 
-    new webpack.LoaderOptionsPlugin({
+    new webpack.LoaderOptionsPlugin( {
       debug: true,
       options: {
-        context: path.resolve(process.cwd(), 'app'),
+        context: path.resolve( process.cwd(), 'app' ),
         output: {
-          path: path.resolve(process.cwd(), 'dll'),
+          path: path.resolve( process.cwd(), 'dll' ),
         },
       },
-    })
+    } )
   ],
-});
+} );

@@ -21,21 +21,21 @@ export function decrement() {
 }
 
 export function incrementIfOdd() {
-  return (dispatch: (action: actionType) => void, getState: () => counterStateType) => {
+  return ( dispatch: ( action: actionType ) => void, getState: () => counterStateType ) => {
     const { counter } = getState();
 
-    if (counter % 2 === 0) {
+    if ( counter % 2 === 0 ) {
       return;
     }
 
-    dispatch(increment());
+    dispatch( increment() );
   };
 }
 
-export function incrementAsync(delay: number = 1000) {
-  return (dispatch: (action: actionType) => void) => {
-    setTimeout(() => {
-      dispatch(increment());
-    }, delay);
+export function incrementAsync( delay: number = 1000 ) {
+  return ( dispatch: ( action: actionType ) => void ) => {
+    setTimeout( () => {
+      dispatch( increment() );
+    }, delay );
   };
 }

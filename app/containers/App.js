@@ -17,18 +17,17 @@ export default class App extends Component {
           <div className="container-fluid">
             <div className="navbar-header">
               <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-                <span className="icon-bar"></span>
-                <span className="icon-bar"></span>
-                <span className="icon-bar"></span>
+                <span className="icon-bar" />
+                <span className="icon-bar" />
+                <span className="icon-bar" />
               </button>
-              <a className="navbar-brand" href="#">Logo</a>
+              <Link className="navbar-brand" to="/">Logo</Link>
             </div>
             <div className="collapse navbar-collapse" id="myNavbar">
               <ul className="nav navbar-nav">
-                <li className="active"><a href="#">Dashboard</a></li>
-                <li><a href="#">Age</a></li>
-                <li><a href="#">Gender</a></li>
-                <li><a href="#">Geo</a></li>
+                <li><Link to="/">Home</Link></li>
+                <li><Link to="/load">File Import</Link></li>
+                <li><Link to="/counter">Counter</Link></li>
               </ul>
             </div>
           </div>
@@ -37,7 +36,7 @@ export default class App extends Component {
         <div className="container-fluid">
           <div className="row content">
             <div className="col-sm-3 sidenav hidden-xs">
-              <br/>
+              <br />
               <h1>Iridium Blue</h1>
               <h2>Facturacion Electronica</h2>
               <ul className="nav nav-pills nav-stacked">
@@ -47,7 +46,7 @@ export default class App extends Component {
               </ul>
             </div>
 
-            <div className="clearfix visible-xs"></div>
+            <div className="clearfix visible-xs" />
             <div className="col-sm-9">
               {this.props.children}
             </div>

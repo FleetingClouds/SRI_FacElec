@@ -6,6 +6,7 @@
   },
   "extends": "airbnb",
   "env": {
+    "jest": true,
     "browser": true,
     "node": true
   },
@@ -30,7 +31,16 @@
     }],
     "react/jsx-no-bind": "off",
     "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
-    "react/prefer-stateless-function": "off"
+    "react/prefer-stateless-function": "off",
+    "space-in-parens": ["error", "always"],
+    "space-unary-ops": [
+        2, {
+          "words": true,
+          "nonwords": false,
+          "overrides": {
+            "!": true
+          }
+    }]    
   },
   "plugins": [
     "flowtype",

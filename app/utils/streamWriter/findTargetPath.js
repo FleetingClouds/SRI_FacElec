@@ -1,103 +1,120 @@
-
-import fs         from 'fs';
-import path       from 'path';
-import os         from 'os';
+// @flow
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import getAppName from './getAppName';
 import mkFileName from './mkFileName';
 
-let fileName = ``;
+// const LG = console.log;
+let fileName = '';
 /**
  * Try to determine a platform-specific path where can write logs
  * @param {string} [appName] Used to determine the last part of a log path
  * @return {string|boolean}
  */
-export default (appName, fileNamePrefix, fileNameSuffix, _fileName) => {
+
+// export const findTargetPath = ( q: number ): string | null => {
+//   if ( q === 0 ) return 'asdfasdf';
+//   return null;
+// };
+
+export default ( (
+  _appName: string,
+  fileNamePrefix: string | null,
+  fileNameSuffix: string | null,
+  _fileName: string | null
+): string | null => {
+  let appName = _appName;
   appName = appName || getAppName();
-  if (!appName) {
-    return false;
+  if ( ! appName ) {
+    return null;
   }
 
-   fileName = _fileName ? _fileName : mkFileName(fileNamePrefix, fileNameSuffix);
+  fileName = _fileName || mkFileName( fileNamePrefix, fileNameSuffix );
 
 
+  const homeDir = os.homedir ? os.homedir() : process.env.HOME;
 
-  var homeDir = os.homedir ? os.homedir() : process.env['HOME'];
-
-  var dir;
-  switch (process.platform) {
+  let dir;
+  switch ( process.platform ) {
     case 'linux': {
-      dir = prepareDir(process.env['XDG_CONFIG_HOME'], appName)
-        .or(homeDir, '.config', appName)
-        .or(process.env['XDG_DATA_HOME'], appName)
-        .or(homeDir, '.local', 'share', appName)
+      // $FlowFixMe
+      dir = prepareDir( process.env.XDG_CONFIG_HOME, appName )
+        .or( homeDir, '.config', appName )
+        .or( process.env.XDG_DATA_HOME, appName )
+        .or( homeDir, '.local', 'share', appName )
         .result;
       break;
     }
 
     case 'darwin': {
-      dir = prepareDir(homeDir, 'Library', 'Logs', appName)
-        .or(homeDir, 'Library', 'Application Support', appName)
+      // $FlowFixMe
+      dir = prepareDir( homeDir, 'Library', 'Logs', appName )
+        .or( homeDir, 'Library', 'Application Support', appName )
         .result;
       break;
     }
 
     case 'win32': {
-      dir = prepareDir(process.env['APPDATA'], appName)
-        .or(homeDir, 'AppData', 'Roaming', appName)
+      // $FlowFixMe
+      dir = prepareDir( process.env.APPDATA, appName )
+        .or( homeDir, 'AppData', 'Roaming', appName )
         .result;
       break;
     }
+
+    default: {
+      throw new Error( 'Unknown Electron platform type!' );
+    }
   }
 
-  if (dir) {
-    let target = path.join(dir, fileName);
-    console.log(`$$$$$$$ `);
-    console.log(`target `, target);
+  if ( dir ) {
+    const target = path.join( dir, fileName );
+    console.log( '$$$$$$$ ' );
+    console.log( 'target ', target );
     return target;
-  } else {
-    return false;
   }
-}
+  return null;
+} );
 
-
-
-function prepareDir(dirPath) {
-  // jshint -W040
-  if (!this || this.or !== prepareDir || !this.result) {
-    if (!dirPath) {
+function prepareDir( _dirPath: ?string, ...args ) {
+  let dirPath: ?string = _dirPath;
+  if ( ! this || this.or !== prepareDir || ! this.result ) {
+    if ( ! dirPath ) {
       return { or: prepareDir };
     }
 
-    //noinspection JSCheckFunctionSignatures
-    dirPath = path.join.apply(path, arguments);
-    mkDir(dirPath);
+    dirPath = path.join( dirPath, ...args );
+    mkDir( dirPath );
 
     try {
-      fs.accessSync(dirPath, fs.W_OK);
-    } catch (e) {
+      fs.accessSync( dirPath, fs.W_OK );
+    } catch ( e ) {
       return { or: prepareDir };
     }
   }
 
+  // $FlowFixMe
+  const rslt = ( this ? this.result : false ) || dirPath;
   return {
     or: prepareDir,
-    result: (this ? this.result : false) || dirPath
+    result: rslt
   };
 }
 
-function mkDir(dirPath, root) {
-  var dirs = dirPath.split(path.sep);
-  var dir = dirs.shift();
-  root = (root || '') + dir + path.sep;
+function mkDir( dirPath, _root ) {
+  let root = _root;
+  const dirs = dirPath.split( path.sep );
+  const dir = dirs.shift();
+  root = ( root || '' ) + dir + path.sep;
 
   try {
-    fs.mkdirSync(root);
-  } catch (e) {
-    if (!fs.statSync(root).isDirectory()) {
-      throw new Error(e);
+    fs.mkdirSync( root );
+  } catch ( e ) {
+    if ( ! fs.statSync( root ).isDirectory() ) {
+      throw new Error( e );
     }
   }
 
-  return !dirs.length || mkDir(dirs.join(path.sep), root);
+  return ! dirs.length || mkDir( dirs.join( path.sep ), root );
 }
-

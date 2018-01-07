@@ -12,57 +12,55 @@ function setup() {
     incrementAsync: spy(),
     decrement: spy()
   };
-  const component = shallow(<Counter counter={1} {...actions} />);
+  const component = shallow( <Counter counter={1} {...actions} /> );
   return {
     component,
     actions,
-    buttons: component.find('button'),
-    p: component.find('.counter')
+    buttons: component.find( 'button' ),
+    p: component.find( '.counter' )
   };
 }
 
-describe('Counter component', () => {
-  it('should should display count', () => {
+describe( 'Counter component', () => {
+  it( 'should should display count', () => {
     const { p } = setup();
-    expect(p.text()).toMatch(/^1$/);
-  });
+    expect( p.text() ).toMatch( /^1$/ );
+  } );
 
-  it('should first button should call increment', () => {
+  it( 'should first button should call increment', () => {
     const { buttons, actions } = setup();
-    buttons.at(0).simulate('click');
-    expect(actions.increment.called).toBe(true);
-  });
+    buttons.at( 0 ).simulate( 'click' );
+    expect( actions.increment.called ).toBe( true );
+  } );
 
-  it('should match exact snapshot', () => {
+  it( 'should match exact snapshot', () => {
     const { actions } = setup();
     const tree = renderer
-      .create(
-        <div>
-          <Router>
-            <Counter counter={1} {...actions} />
-          </Router>
-        </div>
-      )
+      .create( <div>
+        <Router>
+          <Counter counter={1} {...actions} />
+        </Router>
+      </div> )
       .toJSON();
 
-    expect(tree).toMatchSnapshot();
-  });
+    expect( tree ).toMatchSnapshot();
+  } );
 
-  it('should second button should call decrement', () => {
+  it( 'should second button should call decrement', () => {
     const { buttons, actions } = setup();
-    buttons.at(1).simulate('click');
-    expect(actions.decrement.called).toBe(true);
-  });
+    buttons.at( 1 ).simulate( 'click' );
+    expect( actions.decrement.called ).toBe( true );
+  } );
 
-  it('should third button should call incrementIfOdd', () => {
+  it( 'should third button should call incrementIfOdd', () => {
     const { buttons, actions } = setup();
-    buttons.at(2).simulate('click');
-    expect(actions.incrementIfOdd.called).toBe(true);
-  });
+    buttons.at( 2 ).simulate( 'click' );
+    expect( actions.incrementIfOdd.called ).toBe( true );
+  } );
 
-  it('should fourth button should call incrementAsync', () => {
+  it( 'should fourth button should call incrementAsync', () => {
     const { buttons, actions } = setup();
-    buttons.at(3).simulate('click');
-    expect(actions.incrementAsync.called).toBe(true);
-  });
-});
+    buttons.at( 3 ).simulate( 'click' );
+    expect( actions.incrementAsync.called ).toBe( true );
+  } );
+} );

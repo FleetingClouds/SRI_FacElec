@@ -11,9 +11,9 @@ import merge from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from './internals/scripts/CheckNodeEnv';
 
-CheckNodeEnv('production');
+CheckNodeEnv( 'production' );
 
-export default merge.smart(baseConfig, {
+export default merge.smart( baseConfig, {
   devtool: 'source-map',
 
   target: 'electron-renderer',
@@ -21,7 +21,7 @@ export default merge.smart(baseConfig, {
   entry: './app/index',
 
   output: {
-    path: path.join(__dirname, 'app/dist'),
+    path: path.join( __dirname, 'app/dist' ),
     publicPath: '../dist/',
     filename: 'renderer.prod.js'
   },
@@ -31,15 +31,15 @@ export default merge.smart(baseConfig, {
       // Extract all .global.css to style.css as is
       {
         test: /\.global\.css$/,
-        use: ExtractTextPlugin.extract({
+        use: ExtractTextPlugin.extract( {
           use: 'css-loader',
           fallback: 'style-loader',
-        })
+        } )
       },
       // Pipe other styles through css modules and append to style.css
       {
         test: /^((?!\.global).)*\.css$/,
-        use: ExtractTextPlugin.extract({
+        use: ExtractTextPlugin.extract( {
           use: {
             loader: 'css-loader',
             options: {
@@ -48,12 +48,12 @@ export default merge.smart(baseConfig, {
               localIdentName: '[name]__[local]__[hash:base64:5]',
             }
           }
-        }),
+        } ),
       },
       // Add SASS support  - compile all .global.scss files and pipe it to style.css
       {
         test: /\.global\.scss$/,
-        use: ExtractTextPlugin.extract({
+        use: ExtractTextPlugin.extract( {
           use: [
             {
               loader: 'css-loader'
@@ -63,12 +63,12 @@ export default merge.smart(baseConfig, {
             }
           ],
           fallback: 'style-loader',
-        })
+        } )
       },
       // Add SASS support  - compile all other .scss files and pipe it to style.css
       {
         test: /^((?!\.global).)*\.scss$/,
-        use: ExtractTextPlugin.extract({
+        use: ExtractTextPlugin.extract( {
           use: [{
             loader: 'css-loader',
             options: {
@@ -80,7 +80,7 @@ export default merge.smart(baseConfig, {
           {
             loader: 'sass-loader'
           }]
-        }),
+        } ),
       },
       // WOFF Font
       {
@@ -149,20 +149,20 @@ export default merge.smart(baseConfig, {
      * NODE_ENV should be production so that modules do not perform certain
      * development checks
      */
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-    }),
+    new webpack.DefinePlugin( {
+      'process.env.NODE_ENV': JSON.stringify( process.env.NODE_ENV || 'production' )
+    } ),
 
     /**
      * Babli is an ES6+ aware minifier based on the Babel toolchain (beta)
      */
     // new BabiliPlugin(),
 
-    new ExtractTextPlugin('style.css'),
+    new ExtractTextPlugin( 'style.css' ),
 
-    new BundleAnalyzerPlugin({
+    new BundleAnalyzerPlugin( {
       analyzerMode: process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true'
-    }),
+    } ),
   ],
-});
+} );
