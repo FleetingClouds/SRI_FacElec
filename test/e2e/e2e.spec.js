@@ -2,7 +2,11 @@ import { Application } from 'spectron';
 import electronPath from 'electron';
 import path from 'path';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 240000;
+
+const fldCounter = '//div[@data-tid="counter"]';
+const btnbtn = '[data-tclass="btn"]';
+const lnkCounter = '[data-tid=link-Counter]';
 
 const delay = time => new Promise( resolve => setTimeout( resolve, time ) );
 
@@ -22,10 +26,10 @@ describe( 'main window', function spec() {
     }
   } );
 
-  const findCounter = () => this.app.client.element( '[data-tid="counter"]' );
+  const findCounter = () => this.app.client.element( fldCounter );
 
   const findButtons = async () => {
-    const { value } = await this.app.client.elements( '[data-tclass="btn"]' );
+    const { value } = await this.app.client.elements( btnbtn );
     return value.map( btn => btn.ELEMENT );
   };
 
@@ -50,10 +54,10 @@ describe( 'main window', function spec() {
     expect( logs ).toHaveLength( 0 );
   } );
 
-  it( 'should to Counter with click "to Counter" link', async () => {
+  it( 'should turn to Counter page with click on "Counter" menu item', async () => {
     const { client } = this.app;
 
-    await client.click( '[data-tid=container] > a' );
+    await client.click( lnkCounter );
     expect( await findCounter().getText() ).toBe( '0' );
   } );
 
@@ -104,6 +108,6 @@ describe( 'main window', function spec() {
     const { client } = this.app;
     await client.element( '[data-tid="backButton"] > a' ).click();
 
-    expect( await client.isExisting( '[data-tid="container"]' ) ).toBe( true );
+    expect( await client.isExisting( lnkCounter ) ).toBe( true );
   } );
 } );

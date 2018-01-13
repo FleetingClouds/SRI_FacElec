@@ -13,7 +13,7 @@ function setup( initialState ) {
     <ConnectedRouter history={history}>
       <CounterPage />
     </ConnectedRouter>
-  </Provider> );
+  </Provider> ); // eslint-disable-line react/jsx-closing-tag-location
   return {
     app,
     buttons: app.find( 'button' ),

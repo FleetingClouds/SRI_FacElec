@@ -70,8 +70,6 @@ export default ( (
 
   if ( dir ) {
     const target = path.join( dir, fileName );
-    console.log( '$$$$$$$ ' );
-    console.log( 'target ', target );
     return target;
   }
   return null;

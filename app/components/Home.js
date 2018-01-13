@@ -34,8 +34,8 @@ const colUidDetail = 'codigoPrincipal';
 const credsPath: string | null = pathFinder( 'sri_FacElec', '', '', 'LogichemAutoInvoiceServiceAcct.json' );
 if ( ! credsPath ) throw new Error( 'Could not prepare a path for finding credentials.' );
 let credsJson = null;
-LG( `fileName : ${credsPath}` );
-LG( credsPath.toString() );
+// LG( `fileName : ${credsPath}` );
+// LG( credsPath.toString() );
 try {
   credsJson = JSON.parse( fs.readFileSync( credsPath, 'utf8' ) );
 } catch ( e ) {
@@ -50,7 +50,7 @@ const getDetailsAttributes = ( detail ) => {
   const rslt = {};
   rslt.idx = uid[1] ? Number.parseInt( uid[1], 10 ) - 1 : 0;
   rslt.attr = Names[uid[0]] ? Names[uid[0]] : uid[0];
-  rslt.value = detail[1];
+  rslt.value = detail[1]; // eslint-disable-line prefer-destructuring
   return rslt;
 };
 

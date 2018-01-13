@@ -50,11 +50,12 @@ const configureStore = ( initialState?: counterStateType ) => {
   // Create Store
   const store = createStore( rootReducer, initialState, enhancer );
 
+  /* eslint-disable global-require */
   if ( module.hot ) {
     module.hot.accept( '../reducers', () =>
-      store.replaceReducer( require( '../reducers' ) ) // eslint-disable-line global-require
-    );
+      store.replaceReducer( require( '../reducers' ) ) );
   }
+  /* eslint-enable global-require */
 
   return store;
 };

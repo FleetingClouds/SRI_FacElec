@@ -10,13 +10,13 @@ function find( _root: string ) {
 
   while ( ! file ) {
     let parent;
-// $FlowFixMe
+    // $FlowFixMe
     file = path.join( root, 'package.json' );
 
     try {
       fs.statSync( file );
     } catch ( e ) {
-// $FlowFixMe
+      // $FlowFixMe
       parent = path.resolve( root, '..' );
       file = null;
     }
@@ -44,7 +44,7 @@ function loadPackageName() {
   }
 
   if ( ! packageFile && process.resourcesPath ) {
-// $FlowFixMe
+    // $FlowFixMe
     packageFile = find( path.join( process.resourcesPath, 'app.asar' ) );
     const electronModule = path.join( 'node_modules', 'electron', 'package.json' );
     if ( packageFile && packageFile.indexOf( electronModule ) !== -1 ) {

@@ -1,7 +1,6 @@
 // @flow
 import React, { Component } from 'react';
 import type { Children } from 'react';
-
 import { Link } from 'react-router-dom';
 
 export default class App extends Component {
@@ -25,9 +24,9 @@ export default class App extends Component {
             </div>
             <div className="collapse navbar-collapse" id="myNavbar">
               <ul className="nav navbar-nav">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/load">File Import</Link></li>
-                <li><Link to="/counter">Counter</Link></li>
+                <li><Link data-tid="lnk-Home" to="/">Home</Link></li>
+                <li><Link data-tid="lnk-FileImport" to="/load">File Import</Link></li>
+                <li><Link data-tid="lnk-Counter" to="/counter">Counter</Link></li>
               </ul>
             </div>
           </div>
@@ -40,9 +39,9 @@ export default class App extends Component {
               <h1>Iridium Blue</h1>
               <h2>Facturacion Electronica</h2>
               <ul className="nav nav-pills nav-stacked">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/load">File Import</Link></li>
-                <li><Link to="/counter">Counter</Link></li>
+                <li><Link data-tid="link-Home" to="/">Home</Link></li>
+                <li><Link data-tid="link-FileImport" to="/load">File Import</Link></li>
+                <li><Link data-tid="link-Counter" to="/counter">Counter</Link></li>
               </ul>
             </div>
 

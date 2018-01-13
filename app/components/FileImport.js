@@ -39,7 +39,6 @@ type document = {
 };
 
 export default class FileImport extends Component {
-
   jsonFactura: {};
   theDocument: document;
 
@@ -47,7 +46,7 @@ export default class FileImport extends Component {
     LG( `error code ${error.code}: ${error.message}` );
   }
 
-// $FlowFixMe
+  // $FlowFixMe
   onFilesChange( files ) {
     const csvFile = files[0];
 
@@ -187,8 +186,8 @@ export default class FileImport extends Component {
             } );
 
             const periods: Array<number> = dcmnt.infoFactura.fechaEmision
-                                            .split( '/' )
-                                            .map( x => Number.parseInt( x, 10 ) );
+              .split( '/' )
+              .map( x => Number.parseInt( x, 10 ) );
             const fecha: Date = new Date( periods[0], periods[1], periods[2] );
             LG( '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  fecha : %s', fecha );
             const secuencial = String( `00${dcmnt.infoTributaria.secuencial}` ).padStart( 9, '0' );
