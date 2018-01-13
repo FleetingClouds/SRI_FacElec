@@ -29,8 +29,8 @@ install:
 
 test_script:
   - node --version
-  - yarn lint
-  - yarn flow
-  - yarn package
-  - yarn test
-  - yarn test-e2e
+  - yarn run lint
+  - yarn run flow
+  - yarn run package
+  - yarn run test
+  - yarn run test-e2e
