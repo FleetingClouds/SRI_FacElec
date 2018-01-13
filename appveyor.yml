@@ -29,7 +29,7 @@ install:
 
 test_script:
   - node --version
-  - yarn run lint
+  # - yarn run lint
   - yarn run flow
   - yarn run package
   - yarn run test
