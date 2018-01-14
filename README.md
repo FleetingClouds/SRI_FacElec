@@ -7,6 +7,7 @@
 [![Build Status][travis-image]][travis-url]
 [![Appveyor Build Status][appveyor-image]][appveyor-url]
 [![Dependency Status][david_img]][david_site]
+[![Dev Dependency Status][dev_david_img]][dev_david_site]
 [![Github Tag][github-tag-image]][github-tag-url]
 [![Join the chat at https://gitter.im/electron-react-boilerplate/Lobby](https://badges.gitter.im/electron-react-boilerplate/Lobby.svg)](https://gitter.im/electron-react-boilerplate/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![OpenCollective](https://opencollective.com/electron-react-boilerplate/backers/badge.svg)](#backers)
@@ -330,5 +331,7 @@ MIT © [C. T. Lin](https://github.com/chentsulin)
 [travis-url]: https://travis-ci.org/FleetingClouds/SRI_FacElec
 [appveyor-image]: https://ci.appveyor.com/api/projects/status/kf46d3weoklu3bng?svg=true
 [appveyor-url]: https://ci.appveyor.com/api/projects/status/kf46d3weoklu3bng
-[david_img]: https://img.shields.io/david/martinhbramwell/sri-facelec.svg
-[david_site]: https://david-dm.org/martinhbramwell/sri-facelec
+[dev_david_img]: https://david-dm.org/FleetingClouds/SRI_FacElec/dev-status.svg
+[dev_david_site]: https://david-dm.org/FleetingClouds/SRI_FacElec?type=dev
+[david_img]: https://david-dm.org/FleetingClouds/SRI_FacElec/status.svg
+[david_site]: https://david-dm.org/FleetingClouds/SRI_FacElec
