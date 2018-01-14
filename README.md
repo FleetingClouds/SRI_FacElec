@@ -328,7 +328,7 @@ MIT © [C. T. Lin](https://github.com/chentsulin)
 [github-tag-url]: https://github.com/martinhbramwell/sri-facelec/releases/latest
 [travis-image]: https://travis-ci.org/FleetingClouds/SRI_FacElec.svg?branch=dev
 [travis-url]: https://travis-ci.org/FleetingClouds/SRI_FacElec
-[appveyor-image]: https://ci.appveyor.com/api/projects/status/github/martinhbramwell/sri-facelec?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/martinhbramwell/sri-facelec/branch/dev
+[appveyor-image]: https://ci.appveyor.com/api/projects/status/kf46d3weoklu3bng?svg=true
+[appveyor-url]: https://ci.appveyor.com/api/projects/status/kf46d3weoklu3bng
 [david_img]: https://img.shields.io/david/martinhbramwell/sri-facelec.svg
 [david_site]: https://david-dm.org/martinhbramwell/sri-facelec
