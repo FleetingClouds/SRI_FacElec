@@ -21,6 +21,10 @@ shallow_clone: true
 
 clone_depth: 1
 
+artifacts:
+  - path: 'release\sri_FacElec*.exe'
+    type: File
+
 install:
   - ps: Install-Product node $env:nodejs_version
   - set CI=true
