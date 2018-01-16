@@ -3799,14 +3799,14 @@ eslint-plugin-compat@^2.1.0:
     caniuse-db "^1.0.30000748"
     requireindex "^1.1.0"
 
-eslint-plugin-flowtype-errors@^3.3.0:
+eslint-plugin-flowtype-errors@^3.3.7:
   version "3.3.7"
   resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype-errors/-/eslint-plugin-flowtype-errors-3.3.7.tgz#da8fbfde0d3a887bc4513fbb2e8dd9e227433953"
   dependencies:
     babel-runtime "^6.26.0"
     slash "^1.0.0"
 
-eslint-plugin-flowtype@^2.33.0:
+eslint-plugin-flowtype@^2.41.0:
   version "2.41.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-2.41.0.tgz#fd5221c60ba917c059d7ef69686a99cca09fd871"
   dependencies:
@@ -4403,19 +4403,19 @@ flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
 
-flow-bin@^0.48.0:
-  version "0.48.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.48.0.tgz#72d075143524358db8901525e3c784dc13a7c7ee"
+flow-bin@^0.63.1:
+  version "0.63.1"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.63.1.tgz#ab00067c197169a5fb5b4996c8f6927b06694828"
 
 flow-config-parser@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/flow-config-parser/-/flow-config-parser-0.3.0.tgz#704916efba88cd2518ab4d8f933079571276138f"
 
-flow-runtime@^0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/flow-runtime/-/flow-runtime-0.13.0.tgz#3dfba528c73be961303501945c7b8a782f733448"
+flow-runtime@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/flow-runtime/-/flow-runtime-0.16.0.tgz#6da4aac36b8e26ea2dc80b38395ebecbfcb5a535"
 
-flow-typed@^2.1.2:
+flow-typed@^2.2.3:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/flow-typed/-/flow-typed-2.2.3.tgz#e7a35915a0f4cfcf8068c1ce291b5c99e6b89efa"
   dependencies:

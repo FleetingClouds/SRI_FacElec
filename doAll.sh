@@ -2,10 +2,10 @@ yarn clean
 
 # rm -fr services/authenticator/node_modules
 
-yarn
+yarn || exit;
 
 pushd app
-yarn
+yarn || exit;
 popd
 
 yarn lint || exit;

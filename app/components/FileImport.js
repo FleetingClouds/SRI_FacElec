@@ -38,10 +38,14 @@ type document = {
   infoAdicional: { campoAdicional: ( XMLProto )[] }
 };
 
-export default class FileImport extends Component {
+type Props = {
+};
+
+export default class FileImport extends Component<Props> {
   jsonFactura: {};
   theDocument: document;
 
+  // $FlowFixMe
   static onFilesError( error ) {
     LG( `error code ${error.code}: ${error.message}` );
   }

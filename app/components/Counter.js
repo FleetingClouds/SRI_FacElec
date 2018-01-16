@@ -3,7 +3,20 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Counter.css';
 
-class Counter extends Component {
+type State = {
+};
+
+/* eslint-disable flowtype/no-weak-types */
+type Props = {
+  increment: Function,
+  incrementIfOdd: Function,
+  incrementAsync: Function,
+  decrement: Function,
+  counter: number
+};
+/* eslint-enable flowtype/no-weak-types */
+
+class Counter extends Component<Props, State> {
   props: {
     increment: () => void,
     incrementIfOdd: () => void,
@@ -12,6 +25,7 @@ class Counter extends Component {
     counter: number
   };
 
+  /* eslint-disable jsx-a11y/anchor-is-valid */
   render() {
     const {
       increment, incrementIfOdd, incrementAsync, decrement, counter
@@ -39,6 +53,7 @@ class Counter extends Component {
       </div>
     );
   }
+  /* eslint-enable jsx-a11y/anchor-is-valid */
 }
 
 export default Counter;

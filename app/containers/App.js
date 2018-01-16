@@ -1,13 +1,18 @@
 // @flow
-import React, { Component } from 'react';
-import type { Children } from 'react';
+import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-export default class App extends Component {
+type Props = {
+  children?: React.Node
+};
+
+export default class App extends React.Component<Props, void> {
   props: {
+    // $FlowFixMe
     children: Children
   };
 
+  /* eslint-disable jsx-a11y/anchor-is-valid */
   render() {
     return (
       <div>
@@ -55,5 +60,6 @@ export default class App extends Component {
       </div>
 
     );
+  /* eslint-enable jsx-a11y/anchor-is-valid */
   }
 }

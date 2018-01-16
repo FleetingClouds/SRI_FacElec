@@ -336,12 +336,15 @@ const buildXMLDoc = () => {
 // }
 
 // ==============
-// type State = {
-//   numInvoice: number
-// };
+type State = {
+  numInvoice: number
+};
+
+type Props = {
+};
 
 // export default class Home extends React.Component<void, void, State> {
-export default class Home extends React.Component {
+export default class Home extends React.Component<Props, State> {
   state: { numInvoice: number };
   constructor( ) {
     super( );
@@ -350,8 +353,9 @@ export default class Home extends React.Component {
     };
   }
 
-  handleInvoiceNumber( e: SyntheticInputEvent & { currentTarget: HTMLInputElement } ) {
+  handleInvoiceNumber( e: SyntheticInputEvent<*> & { currentTarget: HTMLInputElement } ) {
     // LG( `e.target.value %s`, e.target.value )
+    // $FlowFixMe
     this.setState( {
       numInvoice: Number.parseInt( e.currentTarget.value, 10 )
     } );
