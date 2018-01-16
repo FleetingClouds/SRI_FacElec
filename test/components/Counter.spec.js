@@ -33,6 +33,7 @@ describe( 'Counter component', () => {
     expect( actions.increment.called ).toBe( true );
   } );
 
+  /* eslint-disable react/jsx-closing-tag-location */
   it( 'should match exact snapshot', () => {
     const { actions } = setup();
     const tree = renderer
@@ -45,6 +46,7 @@ describe( 'Counter component', () => {
 
     expect( tree ).toMatchSnapshot();
   } );
+  /* eslint-enable react/jsx-closing-tag-location */
 
   it( 'should second button should call decrement', () => {
     const { buttons, actions } = setup();
