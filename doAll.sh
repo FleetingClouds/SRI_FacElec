@@ -1,5 +1,4 @@
-yarn unyarn
-yarn unpkg
+yarn clean
 
 # rm -fr services/authenticator/node_modules
 
@@ -9,8 +8,8 @@ pushd app
 yarn
 popd
 
-# # yarn lint
-# yarn flow
-# yarn package
-# yarn test
-# yarn test-e2e
+yarn lint || exit;
+yarn flow || exit;
+yarn package || exit;
+yarn test || exit;
+yarn test-e2e || exit;
