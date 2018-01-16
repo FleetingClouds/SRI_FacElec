@@ -5,6 +5,9 @@ environment:
     - nodejs_version: 8
 #    - nodejs_version: 7
 
+platform:
+  - x64
+
 cache:
   # - "%LOCALAPPDATA%/Yarn"
   # - node_modules -> package.json
@@ -26,7 +29,7 @@ artifacts:
     type: File
 
 install:
-  - ps: Install-Product node $env:nodejs_version
+  - ps: Install-Product node $env:nodejs_version $env:platform
   - set CI=true
   - yarn
   - cd app && yarn
