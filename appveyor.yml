@@ -37,7 +37,7 @@ install:
 test_script:
   - node --version
   - yarn run lint   # fails in appveyor, works in Win10
-  - yarn run flow
+  # - yarn run flow
   - yarn run package
   - yarn run test
   - yarn run test-e2e

@@ -9,7 +9,7 @@ yarn || exit;
 popd
 
 yarn lint || exit;
-yarn flow || exit;
+# yarn flow || exit;
 yarn package || exit;
 yarn test || exit;
 yarn test-e2e || exit;
